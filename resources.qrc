@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/plugins/layertreeicons">
+        <file>icon.svg</file>
+        <file>about.svg</file>
+    </qresource>
+</RCC>
