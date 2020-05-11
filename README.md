@@ -9,13 +9,13 @@ Category Icon
 --
 It is possible to set new icons for node categories, from the plugin menu, or from a new button, added in the Layer Panel toolbar. It is also possible to change the default icon size in this dialog.
 
-![Settings](./docs/default_icons.png)
+![Default icons dialog](./docs/default_icons.png)
 
 Node Icon
 --
 Custom icons can be set by right-clicking on a node in the Layer Panel.
 
-![Settings](./docs/menu.png)
+![Menu](./docs/menu.png)
 
  - **Set icon from file**: Browse the computer to set the node icon from an image file
  - **Set icon from QGIS resources**: Open a Resource Browser to use one of the icons embedded in QGIS
@@ -23,7 +23,7 @@ Custom icons can be set by right-clicking on a node in the Layer Panel.
 
 Resource browser
 --
-![Settings](./docs/resource_browser.png)
+![Resource browser](./docs/resource_browser.PNG)
 
 The resource browser allow to search through the embedded .qrc files to look for images to use as icon.
 
