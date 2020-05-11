@@ -23,7 +23,7 @@ Custom icons can be set by right-clicking on a node in the Layer Panel.
 
 Resource browser
 --
-![Resource browser](./docs/resource_browser.PNG)
+![Resource browser](./docs/resource_browser.png)
 
 The resource browser allow to search through the embedded .qrc files to look for images to use as icon.
 
