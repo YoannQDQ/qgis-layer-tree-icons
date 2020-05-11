@@ -125,11 +125,11 @@ class CustomTreeModel(QgsLayerTreeModel):
 
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
-            return None
+            return
 
         node = self.index2node(index)
         if not node:
-            return
+            return super().data(index, role)
 
         # Override data for DecorationRole (Icon)
         if role == Qt.DecorationRole and index.column() == 0:
@@ -144,6 +144,9 @@ class CustomTreeModel(QgsLayerTreeModel):
                     icon = QIcon(self.settings.value("group"))
             elif QgsLayerTree.isLayer(node):
                 layer = node.layer()
+
+                if not layer:
+                    return super().data(index, role)
 
                 if layer.type() == QgsMapLayer.RasterLayer:
                     if self.settings.value("raster", ""):
