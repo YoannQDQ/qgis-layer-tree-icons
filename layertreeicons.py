@@ -159,6 +159,6 @@ class LayerTreeIcons:
             self.tr("About Layer Tree Icons"),
             "<b>Source code</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons>GitHub</a><br>"
             "<b>Report issues</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons/issues>GitHub</a><br>"
-            "<b>Documentation</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons>GitHub</a>",
+            "<b>Documentation</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons#layer-tree-icons-qgis-plugin>GitHub</a>",
         )
         bogus.deleteLater()

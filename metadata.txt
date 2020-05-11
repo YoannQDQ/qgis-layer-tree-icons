@@ -11,7 +11,7 @@ author=Yoann Quenach de Quivillic
 email=yoann.quenach@gmail.com
 
 about=Add an item in the QGIS layer tree context menu to set a custom icon on any node.
- Includes a ressource explorer to use QGIS icons
+ Includes a resource browser to use QGIS icons
  Icons can also be set for a given node type (i.e. group, or polygon layer)
 
 hasProcessingProvider=no
