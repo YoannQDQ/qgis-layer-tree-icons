@@ -10,8 +10,8 @@ from PyQt5.QtCore import (
     QSortFilterProxyModel,
     QSize,
 )
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import QDialog, QTreeWidgetItem
+from PyQt5.QtGui import QIcon, QGuiApplication
+from PyQt5.QtWidgets import QDialog, QTreeWidgetItem, QMenu
 
 from .resourcebrowser import Ui_ResourceBrowser
 
@@ -50,9 +50,9 @@ class RessourceModel(QAbstractListModel):
         if role in (Qt.DisplayRole, Qt.ToolTipRole):
             return name
         if role == Qt.EditRole:
-            return f":/{self.ressource_root}/{name}"
+            return f":{self.ressource_root}/{name}"
         if role == Qt.DecorationRole:
-            return QIcon(f":/{self.ressource_root}/{name}")
+            return QIcon(f":{self.ressource_root}/{name}")
 
         return
 
@@ -73,6 +73,8 @@ class ResourceBrowser(QDialog, Ui_ResourceBrowser):
         self.proxy_model.setFilterCaseSensitivity(Qt.CaseInsensitive)
         self.proxy_model.setSourceModel(self.resource_model)
         self.view.setModel(self.proxy_model)
+        self.view.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.view.customContextMenuRequested.connect(self.on_context_menu)
         self.filterLineEdit.textChanged.connect(self.proxy_model.setFilterRegExp)
         self.view.clicked.connect(self.on_click)
         self.view.doubleClicked.connect(self.on_double_click)
@@ -114,3 +116,16 @@ class ResourceBrowser(QDialog, Ui_ResourceBrowser):
     def on_double_click(self, index):
         self.on_click(index)
         self.accept()
+
+    def on_context_menu(self, point):
+        index = self.view.indexAt(point)
+        if index.isValid():
+            menu = QMenu()
+            menu.addAction(
+                QIcon(":/images/themes/default/mActionEditCopy.svg"),
+                self.tr("Copy resource path to clipboard"),
+            )
+            menu.exec(self.view.mapToGlobal(point))
+            QGuiApplication.clipboard().setText(
+                self.proxy_model.data(index, Qt.EditRole)
+            )
