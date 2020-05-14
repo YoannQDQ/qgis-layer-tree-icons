@@ -2,7 +2,7 @@
 
 import os
 
-from PyQt5.QtCore import QObject, QEvent, Qt, QSettings
+from PyQt5.QtCore import QObject, QEvent, Qt, QSettings, QSize
 from PyQt5.QtWidgets import QAction, QDialog, QMenu, QFileDialog
 from PyQt5.QtGui import QIcon, QPixmap, QPainter
 
@@ -14,6 +14,7 @@ from qgis.core import (
     QgsApplication,
     QgsWkbTypes,
     QgsMapLayer,
+    QgsSymbolLegendNode,
 )
 from qgis.utils import iface
 
@@ -126,8 +127,22 @@ class CustomTreeModel(QgsLayerTreeModel):
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return
-
         node = self.index2node(index)
+        legend_node = self.index2legendNode(index)
+
+        if legend_node and role == Qt.DecorationRole:
+
+            if isinstance(legend_node, QgsSymbolLegendNode):
+                size = iface.layerTreeView().iconSize()
+                # Default res, use default embedded icon
+                if size.width() in (-1, 16):
+                    return super().data(index, role)
+                # Bigger res, use custom icon generated from symbol
+                else:
+                    pixmap = QPixmap.fromImage(legend_node.symbol().asImage(size))
+                    icon = QIcon(pixmap)
+                return icon
+
         if not node:
             return super().data(index, role)
 
@@ -157,10 +172,19 @@ class CustomTreeModel(QgsLayerTreeModel):
                     if self.testFlag(
                         QgsLayerTreeModel.ShowLegend
                     ) and self.legendEmbeddedInParent(node):
-                        icon = self.legendIconEmbeddedInParent(node)
+                        size = iface.layerTreeView().iconSize()
 
-                        pixmap = QPixmap(icon.pixmap(64, 64)).scaled(64, 64)
-                        icon = QIcon(pixmap)
+                        # Default res, use default embedded icon
+                        if size.width() in (-1, 16):
+                            icon = self.legendIconEmbeddedInParent(node)
+
+                        # Bigger res, use custom icon generated from symbol
+                        else:
+                            legend_node = self.legendNodeEmbeddedInParent(node)
+                            pixmap = QPixmap.fromImage(
+                                legend_node.symbol().asImage(size)
+                            )
+                            icon = QIcon(pixmap)
 
                     else:
                         if layer.geometryType() == QgsWkbTypes.PointGeometry:
