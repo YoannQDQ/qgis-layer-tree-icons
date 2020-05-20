@@ -139,8 +139,13 @@ class CustomTreeModel(QgsLayerTreeModel):
                     return super().data(index, role)
                 # Bigger res, use custom icon generated from symbol
                 else:
-                    pixmap = QPixmap.fromImage(legend_node.symbol().asImage(size))
+                    symbol = legend_node.symbol()
+                    if symbol:
+                        pixmap = QPixmap.fromImage(symbol.asImage(size))
                     icon = QIcon(pixmap)
+                    else:
+                        icon = QIcon()
+
                 return icon
 
         if not node:
@@ -181,10 +186,12 @@ class CustomTreeModel(QgsLayerTreeModel):
                         # Bigger res, use custom icon generated from symbol
                         else:
                             legend_node = self.legendNodeEmbeddedInParent(node)
-                            pixmap = QPixmap.fromImage(
-                                legend_node.symbol().asImage(size)
-                            )
+                            symbol = legend_node.symbol()
+                            if symbol:
+                                pixmap = QPixmap.fromImage(symbol.asImage(size))
                             icon = QIcon(pixmap)
+                            else:
+                                icon = QIcon()
 
                     else:
                         if layer.geometryType() == QgsWkbTypes.PointGeometry:
