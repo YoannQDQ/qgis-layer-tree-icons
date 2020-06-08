@@ -2,9 +2,16 @@
 
 import os
 
-from PyQt5.QtCore import QObject, QEvent, Qt, QSettings, QSize
-from PyQt5.QtWidgets import QAction, QDialog, QMenu, QFileDialog
-from PyQt5.QtGui import QIcon, QPixmap, QPainter
+from PyQt5.QtCore import (
+    QObject,
+    QEvent,
+    QSettings,
+    QSize,
+    Qt,
+    QPointF,
+)
+from PyQt5.QtWidgets import QAction, QDialog, QFileDialog
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFontMetricsF
 
 from qgis.core import (
     QgsProject,
@@ -15,8 +22,13 @@ from qgis.core import (
     QgsWkbTypes,
     QgsMapLayer,
     QgsSymbolLegendNode,
+    QgsSymbolLayerUtils,
+    QgsTextRenderer,
+    QgsRenderContext,
+    qgsDoubleNear,
+    QgsMapToPixel,
 )
-from qgis.utils import iface
+from qgis.utils import iface, QgsMessageLog
 
 from .resourcebrowserimpl import ResourceBrowser
 
@@ -115,6 +127,88 @@ class LayerTreeViewEventFilter(QObject):
             node.removeCustomProperty("plugins/customTreeIcon/icon")
 
 
+def createTemporaryRenderContext():
+
+    layerModel = iface.layerTreeView().model()
+    mupp, dpi, scale = layerModel.legendMapViewData()
+
+    if qgsDoubleNear(mupp, 0.0) or dpi == 0 or qgsDoubleNear(scale, 0.0):
+        return None
+
+    render_context = QgsRenderContext()
+    render_context.setScaleFactor(dpi / 25.4)
+    render_context.setRendererScale(scale)
+    render_context.setMapToPixel(QgsMapToPixel(mupp))
+    return render_context
+
+
+def pixmapForLegendNode(legend_node):
+
+    # handles only symbol nodes
+    if not isinstance(legend_node, QgsSymbolLegendNode):
+        return
+
+    # If size is default, use default implementation
+    size = iface.layerTreeView().iconSize()
+    if size.width() in (-1, 16):
+        size = QSize(18, 18)
+
+    symbol = legend_node.symbol()
+    if not symbol:
+        return
+
+    # Compute minimum width
+    model = iface.layerTreeView().model()
+    if not legend_node.layerNode():
+        return
+
+    text = legend_node.textOnSymbolLabel()
+
+    minimum_width = max(
+        max(
+            l_node.minimumIconSize().width() + (8 if text else 0)
+            for l_node in model.layerLegendNodes(legend_node.layerNode())
+        ),
+        size.width(),
+    )
+
+    symbol_size = QSize(minimum_width, size.height())
+    context = QgsRenderContext.fromMapSettings(iface.mapCanvas().mapSettings())
+    pixmap = QgsSymbolLayerUtils.symbolPreviewPixmap(symbol, symbol_size, 0, context)
+
+    if text:
+        painter = QPainter(pixmap)
+        text_format = legend_node.textOnSymbolTextFormat()
+
+        try:
+            text_context = createTemporaryRenderContext()
+            if text_context:
+                painter.setRenderHint(QPainter.Antialiasing)
+                text_context.setPainter(painter)
+
+                font_metrics = QFontMetricsF(text_format.scaledFont(context))
+                y_baseline_v_center = (
+                    symbol_size.height()
+                    + font_metrics.ascent()
+                    - font_metrics.descent()
+                ) / 2
+
+                QgsTextRenderer.drawText(
+                    QPointF(symbol_size.width() / 2, y_baseline_v_center),
+                    0,
+                    QgsTextRenderer.AlignCenter,
+                    [text],
+                    text_context,
+                    text_format,
+                )
+                text_context.setPainter(None)
+
+        except Exception as e:
+            QgsMessageLog.logMessage(str(e))
+
+    return pixmap
+
+
 class CustomTreeModel(QgsLayerTreeModel):
     """ Custom tree model which handles custom icons on nodes """
 
@@ -136,22 +230,9 @@ class CustomTreeModel(QgsLayerTreeModel):
         legend_node = self.index2legendNode(index)
 
         if legend_node and role == Qt.DecorationRole:
-
-            if isinstance(legend_node, QgsSymbolLegendNode):
-                size = iface.layerTreeView().iconSize()
-                # Default res, use default embedded icon
-                if size.width() in (-1, 16):
-                    return super().data(index, role)
-                # Bigger res, use custom icon generated from symbol
-                else:
-                    symbol = legend_node.symbol()
-                    if symbol:
-                        pixmap = QPixmap.fromImage(symbol.asImage(size))
-                        icon = QIcon(pixmap)
-                    else:
-                        icon = QIcon()
-
-                return icon
+            pixmap = pixmapForLegendNode(legend_node)
+            if pixmap:
+                return pixmap
 
         if not node:
             return super().data(index, role)
@@ -159,6 +240,8 @@ class CustomTreeModel(QgsLayerTreeModel):
         # Override data for DecorationRole (Icon)
         if role == Qt.DecorationRole and index.column() == 0:
             icon = None
+            pixmap = None
+
             # If a custom icon was set for this node
             if node.customProperty("plugins/customTreeIcon/icon"):
                 icon = QIcon(node.customProperty("plugins/customTreeIcon/icon"))
@@ -184,19 +267,8 @@ class CustomTreeModel(QgsLayerTreeModel):
                     ) and self.legendEmbeddedInParent(node):
                         size = iface.layerTreeView().iconSize()
 
-                        # Default res, use default embedded icon
-                        if size.width() in (-1, 16):
-                            icon = self.legendIconEmbeddedInParent(node)
-
-                        # Bigger res, use custom icon generated from symbol
-                        else:
-                            legend_node = self.legendNodeEmbeddedInParent(node)
-                            symbol = legend_node.symbol()
-                            if symbol:
-                                pixmap = QPixmap.fromImage(symbol.asImage(size))
-                                icon = QIcon(pixmap)
-                            else:
-                                icon = QIcon()
+                        legend_node = self.legendNodeEmbeddedInParent(node)
+                        pixmap = pixmapForLegendNode(legend_node)
 
                     else:
                         if layer.geometryType() == QgsWkbTypes.PointGeometry:
@@ -219,36 +291,34 @@ class CustomTreeModel(QgsLayerTreeModel):
                 except AttributeError:
                     pass
 
-            if icon:
-                # Special case: In-edition vector layer. Draw an editing icon over
-                # the custom icon. Adapted from QGIS source code (qgslayertreemodel.cpp)
-                if QgsLayerTree.isLayer(node):
-                    layer = node.layer()
-                    if (
-                        layer
-                        and isinstance(layer, QgsVectorLayer)
-                        and layer.isEditable()
-                    ):
-                        icon_size = iface.layerTreeView().iconSize().width()
-                        if icon_size == -1:
-                            icon_size = 16
+            # Special case: In-edition vector layer. Draw an editing icon over
+            # the custom icon. Adapted from QGIS source code (qgslayertreemodel.cpp)
+            if (pixmap or icon) and QgsLayerTree.isLayer(node):
+                layer = node.layer()
+                if layer and isinstance(layer, QgsVectorLayer) and layer.isEditable():
+                    icon_size = iface.layerTreeView().iconSize().width()
+                    if icon_size == -1:
+                        icon_size = 16
+                    if not pixmap and icon:
                         pixmap = QPixmap(icon.pixmap(icon_size, icon_size))
-                        painter = QPainter(pixmap)
-                        painter.drawPixmap(
-                            0,
-                            0,
-                            icon_size,
-                            icon_size,
-                            QgsApplication.getThemeIcon(
-                                ("/mIconEditableEdits.svg")
-                                if layer.isModified()
-                                else ("/mActionToggleEditing.svg")
-                            ).pixmap(icon_size, icon_size),
-                        )
-                        painter.end()
-                        del painter
-                        icon = QIcon(pixmap)
+                    painter = QPainter(pixmap)
+                    painter.drawPixmap(
+                        0,
+                        0,
+                        icon_size,
+                        icon_size,
+                        QgsApplication.getThemeIcon(
+                            ("/mIconEditableEdits.svg")
+                            if layer.isModified()
+                            else ("/mActionToggleEditing.svg")
+                        ).pixmap(icon_size, icon_size),
+                    )
+                    painter.end()
+                    del painter
 
+            if pixmap:
+                return pixmap
+            if icon:
                 return icon
 
         # call QgsLayerTreeModel implementation
