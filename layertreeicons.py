@@ -76,6 +76,7 @@ class LayerTreeIcons:
 
         # Save original layer tree model
         self.original_layer_tree_model = self.iface.layerTreeView().model()
+        self.original_layer_tree_model.blockSignals(True)
 
         # Init settings
         self.settings = QSettings()
@@ -141,6 +142,8 @@ class LayerTreeIcons:
         """Removes the plugin menu item and icon from QGIS GUI."""
         self.iface.pluginMenu().removeAction(self.plugin_menu.menuAction())
         self.iface.layerTreeView().setModel(self.original_layer_tree_model)
+
+        self.original_layer_tree_model.blockSignals(False)
         self.iface.layerTreeView().viewport().removeEventFilter(self.view_event_filter)
         self.default_icons_dialog.deleteLater()
         self.iface.layerTreeView().setIconSize(QSize(-1, -1))

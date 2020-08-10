@@ -215,11 +215,6 @@ class CustomTreeModel(QgsLayerTreeModel):
     def __init__(self, parent=None):
         super().__init__(QgsProject.instance().layerTreeRoot(), parent)
         self.setFlags(iface.layerTreeView().layerTreeModel().flags())
-
-        # Disable support for EmbeddedWidgets, which cause QGIS to crash
-        # when moving the node
-        self.setFlag(QgsLayerTreeModel.UseEmbeddedWidgets, False)
-
         self.settings = QSettings()
         self.settings.beginGroup("plugins/layertreeicons/defaulticons")
 
