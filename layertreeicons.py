@@ -21,25 +21,18 @@
  ***************************************************************************/
 """
 import os.path
+import configparser
 
 from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication, QSize
 from PyQt5.QtGui import QIcon
 from PyQt5.QtWidgets import (
     QAction,
-    QDialog,
     QMessageBox,
     QWidget,
     QToolBar,
     QDockWidget,
 )
 
-from qgis.core import (
-    QgsProject,
-    QgsApplication,
-    Qgis,
-)
-
-from qgis.utils import QgsMessageLog
 
 # Initialize Qt resources from file resources.py
 from .resources import *
@@ -110,7 +103,7 @@ class LayerTreeIcons:
         self.manage_default_action.triggered.connect(self.default_icons_dialog.show)
         self.about_action = QAction(
             QIcon(":/plugins/layertreeicons/about.svg"),
-            self.tr("About Layer Tree icons"),
+            self.tr("About Layer Tree Icons"),
             parent=self.iface.mainWindow(),
         )
         self.about_action.triggered.connect(self.show_about)
@@ -157,11 +150,22 @@ class LayerTreeIcons:
         # Used to display plugin icon in the about message box
         bogus = QWidget(self.iface.mainWindow())
         bogus.setWindowIcon(QIcon(":/plugins/layertreeicons/icon.svg"))
+
+        cfg = configparser.ConfigParser()
+        cfg.read(os.path.join(os.path.dirname(__file__), "metadata.txt"))
+        version = cfg.get("general", "version")
+
         QMessageBox.about(
             bogus,
             self.tr("About Layer Tree Icons"),
-            "<b>Source code</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons>GitHub</a><br>"
-            "<b>Report issues</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons/issues>GitHub</a><br>"
-            "<b>Documentation</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons#layer-tree-icons-qgis-plugin>GitHub</a>",
+            "<b>Version</b> {0}<br><br>"
+            "<b>{1}</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons>GitHub</a><br>"
+            "<b>{2}</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons/issues>GitHub</a><br>"
+            "<b>{3}</b> : <a href=https://github.com/YoannQDQ/layer-tree-icons#layer-tree-icons-qgis-plugin>GitHub</a>".format(
+                version,
+                self.tr("Source code"),
+                self.tr("Report issues"),
+                self.tr("Documentation"),
+            ),
         )
         bogus.deleteLater()
