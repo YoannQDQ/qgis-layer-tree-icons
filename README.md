@@ -27,6 +27,36 @@ Resource browser
 
 The resource browser allow to search through the embedded .qrc files to look for images to use as icon.
 
+PyQGIS Cookbook
+--
+
+ - Set custom icon for a specific node:
+
+```python
+iface.layerTreeView().currentNode().setCustomProperty(
+    "plugins/customTreeIcon/icon",
+    "path/to/icon.png"
+)
+```
+ - Set custom icon for an icon type:
+```python
+# Group
+QSettings().setValue("plugins/layertreeicons/defaulticons/group", "path/to/icon.png")
+# Raster
+QSettings().setValue("plugins/layertreeicons/defaulticons/raster", "path/to/icon.png")
+# Point
+QSettings().setValue("plugins/layertreeicons/defaulticons/point", "path/to/icon.png")
+# Line
+QSettings().setValue("plugins/layertreeicons/defaulticons/line", "path/to/icon.png")
+# Polygon
+QSettings().setValue("plugins/layertreeicons/defaulticons/polygon", "path/to/icon.png")
+# No Geometry
+QSettings().setValue("plugins/layertreeicons/defaulticons/nogeometry", "path/to/icon.png")
+# Mesh
+QSettings().setValue("plugins/layertreeicons/defaulticons/mesh", "path/to/icon.png")
+```
+
+
 
 *Copyright © 2020 Yoann Quenach de Quivillic*
 
