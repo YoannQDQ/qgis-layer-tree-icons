@@ -168,6 +168,7 @@ def pixmapForLegendNode(legend_node):
         max(
             l_node.minimumIconSize().width() + (8 if text else 0)
             for l_node in model.layerLegendNodes(legend_node.layerNode())
+            if isinstance(l_node, QgsSymbolLegendNode)
         ),
         size.width(),
     )
