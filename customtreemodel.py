@@ -246,6 +246,9 @@ class CustomTreeModel(QgsLayerTreeModel):
             elif QgsLayerTree.isGroup(node):
                 if self.settings.value("group", ""):
                     icon = QIcon(self.settings.value("group"))
+                else:
+                    icon = QIcon(":/images/themes/default/mActionFolder.svg")
+
             elif QgsLayerTree.isLayer(node):
                 layer = node.layer()
 
@@ -255,6 +258,8 @@ class CustomTreeModel(QgsLayerTreeModel):
                 if layer.type() == QgsMapLayer.RasterLayer:
                     if self.settings.value("raster", ""):
                         icon = QIcon(self.settings.value("raster"))
+                    else:
+                        icon = QIcon(":/images/themes/default/mIconRaster.svg")
 
                 if layer.type() == QgsMapLayer.VectorLayer:
 
@@ -267,23 +272,43 @@ class CustomTreeModel(QgsLayerTreeModel):
                         pixmap = pixmapForLegendNode(legend_node)
 
                     else:
+
                         if layer.geometryType() == QgsWkbTypes.PointGeometry:
                             if self.settings.value("point", ""):
                                 icon = QIcon(self.settings.value("point"))
+                            else:
+                                icon = QIcon(
+                                    ":/images/themes/default/mIconPointLayer.svg"
+                                )
                         elif layer.geometryType() == QgsWkbTypes.LineGeometry:
                             if self.settings.value("line", ""):
                                 icon = QIcon(self.settings.value("line"))
+                            else:
+                                icon = QIcon(
+                                    ":/images/themes/default/mIconLineLayer.svg"
+                                )
                         elif layer.geometryType() == QgsWkbTypes.PolygonGeometry:
                             if self.settings.value("polygon", ""):
                                 icon = QIcon(self.settings.value("polygon"))
+                            else:
+                                icon = QIcon(
+                                    ":/images/themes/default/mIconPolygonLayer.svg"
+                                )
                         elif layer.geometryType() == QgsWkbTypes.NullGeometry:
                             if self.settings.value("nogeometry", ""):
                                 icon = QIcon(self.settings.value("nogeometry"))
+                            else:
+                                icon = QIcon(
+                                    ":/images/themes/default/mIconTableLayer.svg"
+                                )
 
                 try:
                     if layer.type() == QgsMapLayer.MeshLayer:
                         if self.settings.value("mesh", ""):
                             icon = QIcon(self.settings.value("mesh"))
+                        else:
+                            icon = QIcon(":/images/themes/default/mIconMeshLayer.svg")
+
                 except AttributeError:
                     pass
 
