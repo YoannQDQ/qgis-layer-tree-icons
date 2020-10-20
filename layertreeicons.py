@@ -93,14 +93,11 @@ class LayerTreeIcons:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        self.default_icons_dialog = DefaultIconsDialog(self.iface.mainWindow())
-
         self.manage_default_action = QAction(
             QIcon(":/plugins/layertreeicons/icon.svg"),
-            self.tr("Manage Default Tree Icons"),
+            self.tr("Manage Default Tree Properties"),
             parent=self.iface.mainWindow(),
         )
-        self.manage_default_action.triggered.connect(self.default_icons_dialog.show)
         self.about_action = QAction(
             QIcon(":/plugins/layertreeicons/about.svg"),
             self.tr("About Layer Tree Icons"),
@@ -130,6 +127,9 @@ class LayerTreeIcons:
         if self.layer_tree_toolbar:
             self.separator = self.layer_tree_toolbar.addSeparator()
             self.layer_tree_toolbar.addAction(self.manage_default_action)
+
+        self.default_icons_dialog = DefaultIconsDialog(self.iface.mainWindow())
+        self.manage_default_action.triggered.connect(self.default_icons_dialog.show)
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""

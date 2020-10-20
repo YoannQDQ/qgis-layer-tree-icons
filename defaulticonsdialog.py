@@ -4,7 +4,7 @@ import os
 from functools import partial
 
 from PyQt5.QtCore import QResource, Qt, QSettings, QSize, QModelIndex
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtWidgets import (
     QDialog,
     QToolButton,
@@ -17,9 +17,10 @@ from PyQt5.QtWidgets import (
     QPushButton,
     QFileDialog,
     QGroupBox,
+    QFontDialog,
 )
 
-from qgis.core import Qgis
+from qgis.core import Qgis, QgsLayerTree
 from qgis.utils import iface
 
 from .resourcebrowserimpl import ResourceBrowser
@@ -32,12 +33,32 @@ class DefaultIconsDialog(QDialog):
         self.settings = QSettings()
         self.settings.beginGroup("plugins/layertreeicons")
 
-        self.setWindowTitle(self.tr("Default layer tree icons"))
-        self.setMinimumSize(QSize(200, 0))
+        self.setWindowTitle(self.tr("Default layer tree properties"))
+        self.setMinimumSize(QSize(250, 0))
         layout = QVBoxLayout(self)
 
+        form_layout = QFormLayout()
+
         hlayout = QHBoxLayout()
-        hlayout.addWidget(QLabel(self.tr("Icon Size")))
+        self.group_font_label = QLabel("")
+        group_font_button = QToolButton(self)
+        group_font_button.setText("...")
+        hlayout.addWidget(self.group_font_label)
+        hlayout.addWidget(group_font_button)
+        form_layout.addRow(self.tr("Group node font"), hlayout)
+        group_font_button.setToolTip("Select font")
+        group_font_button.clicked.connect(self.select_group_font)
+
+        hlayout = QHBoxLayout()
+        self.layer_font_label = QLabel("")
+        layer_font_button = QToolButton(self)
+        layer_font_button.setText("...")
+        hlayout.addWidget(self.layer_font_label)
+        hlayout.addWidget(layer_font_button)
+        form_layout.addRow(self.tr("Layer node font"), hlayout)
+        layer_font_button.setToolTip("Select font")
+        layer_font_button.clicked.connect(self.select_layer_font)
+
         self.icon_size_combo = QComboBox(self)
         self.icon_size_combo.addItem(self.tr("default"), -1)
         for val in (16, 24, 32, 48, 64):
@@ -47,8 +68,9 @@ class DefaultIconsDialog(QDialog):
         self.icon_size_combo.setCurrentIndex(idx)
         self.icon_size_combo.currentIndexChanged.connect(self.on_icon_size_changed)
 
-        hlayout.addWidget(self.icon_size_combo)
-        layout.addLayout(hlayout)
+        form_layout.addRow(self.tr("Icon Size"), self.icon_size_combo)
+
+        layout.addLayout(form_layout)
         group_box = QGroupBox(self)
         group_box.setTitle("Default Icons")
         self.form_layout = QFormLayout(group_box)
@@ -110,6 +132,18 @@ class DefaultIconsDialog(QDialog):
             action_reset.triggered.connect(partial(self.reset, settings_key))
             button.addAction(action_reset)
 
+        f = QFont()
+        if f.fromString(self.settings.value("defaulticons/group_font")) and f.family():
+            iface.layerTreeView().model().setLayerTreeNodeFont(
+                QgsLayerTree.NodeGroup, f
+            )
+        f = QFont()
+        if f.fromString(self.settings.value("defaulticons/layer_font")) and f.family():
+            iface.layerTreeView().model().setLayerTreeNodeFont(
+                QgsLayerTree.NodeLayer, f
+            )
+        self.update_font_labels()
+
     def set_icon_from_ressources(self, settings_key):
         res = self.resource_browser.exec()
         if res == QDialog.Accepted:
@@ -154,3 +188,58 @@ class DefaultIconsDialog(QDialog):
         val = self.icon_size_combo.currentData()
         iface.layerTreeView().setIconSize(QSize(val, val))
         self.settings.setValue("iconsize", val)
+
+    def select_group_font(self):
+
+        dialog = QFontDialog(iface.mainWindow())
+        dialog.setCurrentFont(
+            iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeGroup)
+        )
+        res = dialog.exec()
+        if res != QDialog.Accepted:
+            return
+
+        iface.layerTreeView().model().setLayerTreeNodeFont(
+            QgsLayerTree.NodeGroup, dialog.currentFont()
+        )
+        self.update_font_labels()
+        self.settings.setValue(
+            f"defaulticons/group_font", dialog.currentFont().toString()
+        )
+        dialog.deleteLater()
+
+    def select_layer_font(self):
+
+        dialog = QFontDialog(iface.mainWindow())
+        dialog.setCurrentFont(
+            iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+        )
+        res = dialog.exec()
+        if res != QDialog.Accepted:
+            return
+
+        iface.layerTreeView().model().setLayerTreeNodeFont(
+            QgsLayerTree.NodeLayer, dialog.currentFont()
+        )
+        self.update_font_labels()
+        self.settings.setValue(
+            f"defaulticons/layer_font", dialog.currentFont().toString()
+        )
+        dialog.deleteLater()
+
+    def update_font_labels(self):
+        layer_font = (
+            iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+        )
+        self.layer_font_label.setText(
+            f"{layer_font.family()}, {layer_font.pointSize()}"
+        )
+        self.layer_font_label.setFont(layer_font)
+
+        group_font = (
+            iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeGroup)
+        )
+        self.group_font_label.setText(
+            f"{group_font.family()}, {group_font.pointSize()}"
+        )
+        self.group_font_label.setFont(group_font)

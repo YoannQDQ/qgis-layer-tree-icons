@@ -10,8 +10,8 @@ from PyQt5.QtCore import (
     Qt,
     QPointF,
 )
-from PyQt5.QtWidgets import QAction, QDialog, QFileDialog
-from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFontMetricsF
+from PyQt5.QtWidgets import QAction, QDialog, QFileDialog, QFontDialog
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFontMetricsF, QFont
 
 from qgis.core import (
     QgsProject,
@@ -79,10 +79,29 @@ class LayerTreeViewEventFilter(QObject):
         action_set_icon_from_qgis.triggered.connect(self.set_custom_icon_from_qgis)
         menu.addAction(action_set_icon_from_qgis)
 
-        if any(
+        action_set_custom_font = QAction(
+            QIcon(":/plugins/layertreeicons/font.svg"),
+            self.tr("Set custom font"),
+            menu,
+        )
+        action_set_custom_font.triggered.connect(self.set_custom_font)
+        menu.addAction(action_set_custom_font)
+
+        custom_icon = any(
             node.customProperty("plugins/customTreeIcon/icon") for node in self.nodes
-        ):
-            self.action_reset_icon = QAction(self.tr("Reset icon"))
+        )
+        custom_font = any(
+            node.customProperty("plugins/customTreeIcon/font") for node in self.nodes
+        )
+        if custom_icon or custom_font:
+            if custom_icon and custom_font:
+                action_txt = self.tr("Reset icon && font")
+            elif custom_icon:
+                action_txt = self.tr("Reset icon")
+            else:
+                action_txt = self.tr("Reset font")
+
+            self.action_reset_icon = QAction(action_txt)
             self.action_reset_icon.triggered.connect(self.reset_custom_icon)
             menu.addAction(self.action_reset_icon)
         return menu
@@ -98,6 +117,26 @@ class LayerTreeViewEventFilter(QObject):
         if res == QDialog.Accepted:
             for node in self.nodes:
                 node.setCustomProperty("plugins/customTreeIcon/icon", dialog.icon)
+        dialog.deleteLater()
+
+    def set_custom_font(self):
+        """ Set a custom icon as a custom property on the selected nodes """
+        dialog = QFontDialog(iface.mainWindow())
+
+        f = iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+
+        for node in self.nodes:
+            if node.customProperty("plugins/customTreeIcon/font"):
+                f.fromString(node.customProperty("plugins/customTreeIcon/font"))
+                break
+        dialog.setCurrentFont(f)
+        res = dialog.exec()
+        if res == QDialog.Accepted:
+            for node in self.nodes:
+                node.setCustomProperty(
+                    "plugins/customTreeIcon/font", dialog.currentFont().toString()
+                )
+
         dialog.deleteLater()
 
     def set_custom_icon_from_file(self):
@@ -125,6 +164,7 @@ class LayerTreeViewEventFilter(QObject):
         """ Delete the custom property, which will restore the default icon """
         for node in self.nodes:
             node.removeCustomProperty("plugins/customTreeIcon/icon")
+            node.removeCustomProperty("plugins/customTreeIcon/font")
 
 
 def createTemporaryRenderContext():
@@ -222,8 +262,32 @@ class CustomTreeModel(QgsLayerTreeModel):
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
             return
+
         node = self.index2node(index)
         legend_node = self.index2legendNode(index)
+
+        if role == Qt.FontRole:
+            f = QFont()
+
+            if node.customProperty("plugins/customTreeIcon/font"):
+                f.fromString(node.customProperty("plugins/customTreeIcon/font"))
+            elif QgsLayerTree.isLayer(node):
+                f = self.layerTreeNodeFont(QgsLayerTree.NodeLayer)
+            elif QgsLayerTree.isGroup(node):
+                f = self.layerTreeNodeFont(QgsLayerTree.NodeGroup)
+
+            if index == self.currentIndex():
+                f.setUnderline(not f.underline())
+
+            if QgsLayerTree.isLayer(node):
+                _, _, scale = self.legendMapViewData()
+                layer = node.layer()
+                if (not node.isVisible() and (not layer or layer.isSpatial())) or (
+                    layer and not layer.isInScaleRange(scale)
+                ):
+                    f.setItalic(not f.italic())
+
+            return f
 
         if legend_node and role == Qt.DecorationRole:
             pixmap = pixmapForLegendNode(legend_node)
