@@ -33,10 +33,10 @@ class DefaultIconsDialog(QDialog):
         self.settings.beginGroup("plugins/layertreeicons")
 
         self.setWindowTitle(self.tr("Default layer tree icons"))
-        self.setMinimumSize(QSize(200, -1))
+        self.setMinimumSize(QSize(200, 0))
         layout = QVBoxLayout(self)
 
-        hlayout = QHBoxLayout(self)
+        hlayout = QHBoxLayout()
         hlayout.addWidget(QLabel(self.tr("Icon Size")))
         self.icon_size_combo = QComboBox(self)
         self.icon_size_combo.addItem(self.tr("default"), -1)
