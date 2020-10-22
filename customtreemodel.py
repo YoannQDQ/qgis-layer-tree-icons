@@ -10,8 +10,8 @@ from PyQt5.QtCore import (
     Qt,
     QPointF,
 )
-from PyQt5.QtWidgets import QAction, QDialog, QFileDialog, QFontDialog
-from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFontMetricsF, QFont
+from PyQt5.QtWidgets import QAction, QDialog, QFileDialog
+from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFontMetricsF, QFont, QColor
 
 from qgis.core import (
     QgsProject,
@@ -31,6 +31,7 @@ from qgis.core import (
 from qgis.utils import iface, QgsMessageLog
 
 from .resourcebrowserimpl import ResourceBrowser
+from .colorfontdialog import ColorFontDialog
 
 
 class LayerTreeViewEventFilter(QObject):
@@ -90,8 +91,19 @@ class LayerTreeViewEventFilter(QObject):
         custom_icon = any(
             node.customProperty("plugins/customTreeIcon/icon") for node in self.nodes
         )
-        custom_font = any(
-            node.customProperty("plugins/customTreeIcon/font") for node in self.nodes
+        custom_font = (
+            any(
+                node.customProperty("plugins/customTreeIcon/font")
+                for node in self.nodes
+            )
+            or any(
+                node.customProperty("plugins/customTreeIcon/textColor")
+                for node in self.nodes
+            )
+            or any(
+                node.customProperty("plugins/customTreeIcon/backgroundColor")
+                for node in self.nodes
+            )
         )
         if custom_icon or custom_font:
             if custom_icon and custom_font:
@@ -121,13 +133,22 @@ class LayerTreeViewEventFilter(QObject):
 
     def set_custom_font(self):
         """ Set a custom icon as a custom property on the selected nodes """
-        dialog = QFontDialog(iface.mainWindow())
+        dialog = ColorFontDialog(iface.mainWindow())
 
         f = iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
 
         for node in self.nodes:
             if node.customProperty("plugins/customTreeIcon/font"):
                 f.fromString(node.customProperty("plugins/customTreeIcon/font"))
+                text_color = node.customProperty(
+                    "plugins/customTreeIcon/textColor", "black"
+                )
+                background_color = node.customProperty(
+                    "plugins/customTreeIcon/backgroundColor", "white"
+                )
+                dialog.setTextColor(QColor(text_color))
+                dialog.setBackgroundColor(QColor(background_color))
+
                 break
         dialog.setCurrentFont(f)
         res = dialog.exec()
@@ -135,6 +156,13 @@ class LayerTreeViewEventFilter(QObject):
             for node in self.nodes:
                 node.setCustomProperty(
                     "plugins/customTreeIcon/font", dialog.currentFont().toString()
+                )
+                node.setCustomProperty(
+                    "plugins/customTreeIcon/textColor", dialog.textColor().name()
+                )
+                node.setCustomProperty(
+                    "plugins/customTreeIcon/backgroundColor",
+                    dialog.backgroundColor().name(),
                 )
 
         dialog.deleteLater()
@@ -165,6 +193,8 @@ class LayerTreeViewEventFilter(QObject):
         for node in self.nodes:
             node.removeCustomProperty("plugins/customTreeIcon/icon")
             node.removeCustomProperty("plugins/customTreeIcon/font")
+            node.removeCustomProperty("plugins/customTreeIcon/textColor")
+            node.removeCustomProperty("plugins/customTreeIcon/backgroundColor")
 
 
 def createTemporaryRenderContext():
@@ -257,7 +287,7 @@ class CustomTreeModel(QgsLayerTreeModel):
         super().__init__(QgsProject.instance().layerTreeRoot(), parent)
         self.setFlags(iface.layerTreeView().layerTreeModel().flags())
         self.settings = QSettings()
-        self.settings.beginGroup("plugins/layertreeicons/defaulticons")
+        self.settings.beginGroup("plugins/layertreeicons")
 
     def data(self, index, role=Qt.DisplayRole):
         if not index.isValid():
@@ -267,7 +297,7 @@ class CustomTreeModel(QgsLayerTreeModel):
         legend_node = self.index2legendNode(index)
 
         if role == Qt.FontRole:
-            f = QFont()
+            f = iface.layerTreeView().font()
 
             if node.customProperty("plugins/customTreeIcon/font"):
                 f.fromString(node.customProperty("plugins/customTreeIcon/font"))
@@ -289,6 +319,38 @@ class CustomTreeModel(QgsLayerTreeModel):
 
             return f
 
+        if role == Qt.ForegroundRole:
+            color = None
+            if node.customProperty("plugins/customTreeIcon/textColor"):
+                color = QColor(node.customProperty("plugins/customTreeIcon/textColor"))
+            elif QgsLayerTree.isGroup(node):
+                if self.settings.value("group_text_color"):
+                    color = QColor(self.settings.value("group_text_color"))
+            else:
+                if self.settings.value("layer_text_color"):
+                    color = QColor(self.settings.value("layer_text_color"))
+            if color:
+                if QgsLayerTree.isLayer(node):
+                    _, _, scale = self.legendMapViewData()
+                    layer = node.layer()
+                    if (not node.isVisible() and (not layer or layer.isSpatial())) or (
+                        layer and not layer.isInScaleRange(scale)
+                    ):
+                        color.setAlpha(128)
+                return color
+
+        if role == Qt.BackgroundRole:
+            if node.customProperty("plugins/customTreeIcon/backgroundColor"):
+                return QColor(
+                    node.customProperty("plugins/customTreeIcon/backgroundColor")
+                )
+            elif QgsLayerTree.isGroup(node):
+                if self.settings.value("group_background_color"):
+                    return QColor(self.settings.value("group_background_color"))
+            else:
+                if self.settings.value("layer_background_color"):
+                    return QColor(self.settings.value("layer_background_color"))
+
         if legend_node and role == Qt.DecorationRole:
             pixmap = pixmapForLegendNode(legend_node)
             if pixmap:
@@ -308,8 +370,8 @@ class CustomTreeModel(QgsLayerTreeModel):
 
             # If an icon was set for the node type
             elif QgsLayerTree.isGroup(node):
-                if self.settings.value("group", ""):
-                    icon = QIcon(self.settings.value("group"))
+                if self.settings.value("defaulticons/group", ""):
+                    icon = QIcon(self.settings.value("defaulticons/group"))
                 else:
                     icon = QIcon(":/images/themes/default/mActionFolder.svg")
 
@@ -320,8 +382,8 @@ class CustomTreeModel(QgsLayerTreeModel):
                     return super().data(index, role)
 
                 if layer.type() == QgsMapLayer.RasterLayer:
-                    if self.settings.value("raster", ""):
-                        icon = QIcon(self.settings.value("raster"))
+                    if self.settings.value("defaulticons/raster", ""):
+                        icon = QIcon(self.settings.value("defaulticons/raster"))
                     else:
                         icon = QIcon(":/images/themes/default/mIconRaster.svg")
 
@@ -338,29 +400,33 @@ class CustomTreeModel(QgsLayerTreeModel):
                     else:
 
                         if layer.geometryType() == QgsWkbTypes.PointGeometry:
-                            if self.settings.value("point", ""):
-                                icon = QIcon(self.settings.value("point"))
+                            if self.settings.value("defaulticons/point", ""):
+                                icon = QIcon(self.settings.value("defaulticons/point"))
                             else:
                                 icon = QIcon(
                                     ":/images/themes/default/mIconPointLayer.svg"
                                 )
                         elif layer.geometryType() == QgsWkbTypes.LineGeometry:
-                            if self.settings.value("line", ""):
-                                icon = QIcon(self.settings.value("line"))
+                            if self.settings.value("defaulticons/line", ""):
+                                icon = QIcon(self.settings.value("defaulticons/line"))
                             else:
                                 icon = QIcon(
                                     ":/images/themes/default/mIconLineLayer.svg"
                                 )
                         elif layer.geometryType() == QgsWkbTypes.PolygonGeometry:
-                            if self.settings.value("polygon", ""):
-                                icon = QIcon(self.settings.value("polygon"))
+                            if self.settings.value("defaulticons/polygon", ""):
+                                icon = QIcon(
+                                    self.settings.value("defaulticons/polygon")
+                                )
                             else:
                                 icon = QIcon(
                                     ":/images/themes/default/mIconPolygonLayer.svg"
                                 )
                         elif layer.geometryType() == QgsWkbTypes.NullGeometry:
-                            if self.settings.value("nogeometry", ""):
-                                icon = QIcon(self.settings.value("nogeometry"))
+                            if self.settings.value("defaulticons/nogeometry", ""):
+                                icon = QIcon(
+                                    self.settings.value("defaulticons/nogeometry")
+                                )
                             else:
                                 icon = QIcon(
                                     ":/images/themes/default/mIconTableLayer.svg"
@@ -368,8 +434,8 @@ class CustomTreeModel(QgsLayerTreeModel):
 
                 try:
                     if layer.type() == QgsMapLayer.MeshLayer:
-                        if self.settings.value("mesh", ""):
-                            icon = QIcon(self.settings.value("mesh"))
+                        if self.settings.value("defaulticons/mesh", ""):
+                            icon = QIcon(self.settings.value("defaulticons/mesh"))
                         else:
                             icon = QIcon(":/images/themes/default/mIconMeshLayer.svg")
 
