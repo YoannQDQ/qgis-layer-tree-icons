@@ -38,7 +38,10 @@ from PyQt5.QtWidgets import (
 from .resources import *
 
 from .defaulticonsdialog import DefaultIconsDialog
-from .customtreemodel import CustomTreeModel, LayerTreeViewEventFilter
+from .customtreemodel import CustomTreeModel
+
+from .layertreecontextmenumanager import LayerTreeContextMenuManager
+from .menuprovider import LayerTreeMenuProvider
 
 
 class LayerTreeIcons:
@@ -113,8 +116,8 @@ class LayerTreeIcons:
 
         # Replace the default QgsLayerTreeModel with our custom model
         self.custom_model = CustomTreeModel()
-        self.view_event_filter = LayerTreeViewEventFilter()
-        self.iface.layerTreeView().viewport().installEventFilter(self.view_event_filter)
+        self.contextMenuManager = LayerTreeContextMenuManager()
+        self.contextMenuManager.addProvider(LayerTreeMenuProvider())
         self.iface.layerTreeView().setModel(self.custom_model)
 
         icon_size = self.settings.value("iconsize", -1, int)
@@ -135,9 +138,7 @@ class LayerTreeIcons:
         """Removes the plugin menu item and icon from QGIS GUI."""
         self.iface.pluginMenu().removeAction(self.plugin_menu.menuAction())
         self.iface.layerTreeView().setModel(self.original_layer_tree_model)
-
         self.original_layer_tree_model.blockSignals(False)
-        self.iface.layerTreeView().viewport().removeEventFilter(self.view_event_filter)
         self.default_icons_dialog.deleteLater()
         self.iface.layerTreeView().setIconSize(QSize(-1, -1))
 
