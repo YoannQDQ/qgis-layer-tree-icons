@@ -3,150 +3,150 @@
 <context>
     <name>DefaultIconsDialog</name>
     <message>
-        <location filename="../defaulticonsdialog.py" line="71"/>
+        <location filename="../defaulticonsdialog.py" line="70"/>
         <source>Icon Size</source>
         <translation>Taille d&apos;icône</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="63"/>
+        <location filename="../defaulticonsdialog.py" line="62"/>
         <source>default</source>
         <translation>par défaut</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="78"/>
-        <source>Reset default icons</source>
-        <translation>Restaurer les icônes par défaut</translation>
-    </message>
-    <message>
-        <location filename="../defaulticonsdialog.py" line="86"/>
+        <location filename="../defaulticonsdialog.py" line="85"/>
         <source>Group</source>
         <translation>Groupe</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="87"/>
+        <location filename="../defaulticonsdialog.py" line="86"/>
         <source>Raster</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="88"/>
+        <location filename="../defaulticonsdialog.py" line="87"/>
         <source>Point</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="89"/>
+        <location filename="../defaulticonsdialog.py" line="88"/>
         <source>Line</source>
         <translation>Ligne</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="90"/>
+        <location filename="../defaulticonsdialog.py" line="89"/>
         <source>Polygon</source>
         <translation>Polygone</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="94"/>
+        <location filename="../defaulticonsdialog.py" line="93"/>
         <source>No Geometry</source>
         <translation>Aucune géométrie</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="102"/>
+        <location filename="../defaulticonsdialog.py" line="101"/>
         <source>Mesh Layer</source>
         <translation>Maillage</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="160"/>
+        <location filename="../defaulticonsdialog.py" line="172"/>
         <source>Select Icon</source>
         <translation>Sélectionner l&apos;icône</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="160"/>
+        <location filename="../defaulticonsdialog.py" line="172"/>
         <source>Image Files (*.svg *.png *.gif);;All files (*)</source>
         <translation>Fichiers image (*.svg *.png *.gif);;Tous les fichiers (*)</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="36"/>
+        <location filename="../defaulticonsdialog.py" line="35"/>
         <source>Default layer tree properties</source>
         <translation>Propriétés par défaut de l&apos;arborescence des couches</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="48"/>
+        <location filename="../defaulticonsdialog.py" line="47"/>
         <source>Group node font</source>
         <translation>Police des groupes</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="58"/>
+        <location filename="../defaulticonsdialog.py" line="57"/>
         <source>Layer node font</source>
         <translation>Police des couches</translation>
+    </message>
+    <message>
+        <location filename="../defaulticonsdialog.py" line="77"/>
+        <source>Reset default properties</source>
+        <translation>Restaurer les propriétés par défaut</translation>
     </message>
 </context>
 <context>
     <name>LayerTreeIcons</name>
     <message>
-        <location filename="../layertreeicons.py" line="158"/>
+        <location filename="../layertreeicons.py" line="159"/>
         <source>About Layer Tree Icons</source>
         <translation>À propos de Layer Tree Icons</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="158"/>
+        <location filename="../layertreeicons.py" line="159"/>
         <source>Source code</source>
         <translation>Code source</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="158"/>
+        <location filename="../layertreeicons.py" line="159"/>
         <source>Report issues</source>
         <translation>Signaler un problème</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="158"/>
+        <location filename="../layertreeicons.py" line="159"/>
         <source>Documentation</source>
         <translation>Documentation</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="96"/>
+        <location filename="../layertreeicons.py" line="99"/>
         <source>Manage Default Tree Properties</source>
         <translation>Gestion des propriétés par défaut de l&apos;arborecence</translation>
     </message>
 </context>
 <context>
-    <name>LayerTreeViewEventFilter</name>
+    <name>LayerTreeMenuProvider</name>
     <message>
-        <location filename="../customtreemodel.py" line="66"/>
+        <location filename="../menuprovider.py" line="33"/>
         <source>Set icon from file</source>
         <translation>Définir l&apos;icône depuis un fichier</translation>
     </message>
     <message>
-        <location filename="../customtreemodel.py" line="74"/>
+        <location filename="../menuprovider.py" line="41"/>
         <source>Set icon from QGIS resources</source>
         <translation>Définir l&apos;icône depuis les ressources QGIS</translation>
     </message>
     <message>
-        <location filename="../customtreemodel.py" line="100"/>
-        <source>Reset icon</source>
-        <translation>Restaurer l&apos;icône</translation>
-    </message>
-    <message>
-        <location filename="../customtreemodel.py" line="150"/>
-        <source>Select Icon</source>
-        <translation>Sélectionner l&apos;icône</translation>
-    </message>
-    <message>
-        <location filename="../customtreemodel.py" line="150"/>
-        <source>Image Files (*.svg *.png *.gif);;All files (*)</source>
-        <translation>Fichiers image (*.svg *.png *.gif);;Tous les fichiers (*)</translation>
-    </message>
-    <message>
-        <location filename="../customtreemodel.py" line="82"/>
+        <location filename="../menuprovider.py" line="49"/>
         <source>Set custom font</source>
         <translation>Définir une police personnalisée</translation>
     </message>
     <message>
-        <location filename="../customtreemodel.py" line="98"/>
+        <location filename="../menuprovider.py" line="76"/>
         <source>Reset icon &amp;&amp; font</source>
         <translation>Restaurer l&apos;icône et la police</translation>
     </message>
     <message>
-        <location filename="../customtreemodel.py" line="102"/>
+        <location filename="../menuprovider.py" line="78"/>
+        <source>Reset icon</source>
+        <translation>Restaurer l&apos;icône</translation>
+    </message>
+    <message>
+        <location filename="../menuprovider.py" line="80"/>
         <source>Reset font</source>
         <translation>Restaurer la police</translation>
+    </message>
+    <message>
+        <location filename="../menuprovider.py" line="144"/>
+        <source>Select Icon</source>
+        <translation>Sélectionner l&apos;icône</translation>
+    </message>
+    <message>
+        <location filename="../menuprovider.py" line="144"/>
+        <source>Image Files (*.svg *.png *.gif);;All files (*)</source>
+        <translation>Fichiers image (*.svg *.png *.gif);;Tous les fichiers (*)</translation>
     </message>
 </context>
 <context>
