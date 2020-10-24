@@ -48,12 +48,12 @@
         <translation>Mesh Layer</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="172"/>
+        <location filename="../defaulticonsdialog.py" line="174"/>
         <source>Select Icon</source>
         <translation>Select Icon</translation>
     </message>
     <message>
-        <location filename="../defaulticonsdialog.py" line="172"/>
+        <location filename="../defaulticonsdialog.py" line="174"/>
         <source>Image Files (*.svg *.png *.gif);;All files (*)</source>
         <translation>Image Files (*.svg *.png *.gif);;All files (*)</translation>
     </message>
@@ -81,27 +81,27 @@
 <context>
     <name>LayerTreeIcons</name>
     <message>
-        <location filename="../layertreeicons.py" line="159"/>
+        <location filename="../layertreeicons.py" line="172"/>
         <source>About Layer Tree Icons</source>
         <translation>À propos de Layer Tree Icons</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="159"/>
+        <location filename="../layertreeicons.py" line="172"/>
         <source>Source code</source>
         <translation>Source code</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="159"/>
+        <location filename="../layertreeicons.py" line="172"/>
         <source>Report issues</source>
         <translation>Report issues</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="159"/>
+        <location filename="../layertreeicons.py" line="172"/>
         <source>Documentation</source>
         <translation>Documentation</translation>
     </message>
     <message>
-        <location filename="../layertreeicons.py" line="99"/>
+        <location filename="../layertreeicons.py" line="112"/>
         <source>Manage Default Tree Properties</source>
         <translation>Manage Default Tree Properties</translation>
     </message>

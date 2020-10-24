@@ -2,7 +2,7 @@
 name=Layer Tree Icons
 qgisMinimumVersion=3.0
 description=Layer tree icons customization
-version=1.5.0
+version=1.5.1
 author=Yoann Quenach de Quivillic
 email=yoann.quenach@gmail.com
 
@@ -11,7 +11,9 @@ about=Adds some actions in the QGIS layer tree context menu to set a custom icon
  Icons can also be set for a given node type (i.e. group, or polygon layer)
 
 
-changelog=1.5.0 2020-10-23
+changelog=1.5.1 2020-10-24
+      * Fix issue #6 (QFont saved in settings instead of string, and None node)
+      1.5.0 2020-10-23
       * Refactor context menu
       * Add font color
       1.4.0 2020-10-20
