@@ -24,7 +24,7 @@ import os.path
 import configparser
 
 from PyQt5.QtCore import QSettings, QTranslator, QCoreApplication, QSize
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QFont
 from PyQt5.QtWidgets import (
     QAction,
     QMessageBox,
@@ -77,6 +77,19 @@ class LayerTreeIcons:
         # Init settings
         self.settings = QSettings()
         self.settings.beginGroup("plugins/layertreeicons")
+
+        # Normalize settings
+        group_font = self.settings.value("group_font")
+        if group_font and isinstance(group_font, QFont):
+            self.settings.setValue("group_font", group_font.toString())
+        elif not isinstance(group_font, str):
+            self.settings.setValue("group_font", "")
+
+        layer_font = self.settings.value("layer_font")
+        if layer_font and isinstance(layer_font, QFont):
+            self.settings.setValue("layer_font", layer_font.toString())
+        elif not isinstance(layer_font, str):
+            self.settings.setValue("layer_font", "")
 
     # noinspection PyMethodMayBeStatic
     def tr(self, message):

@@ -140,7 +140,9 @@ class DefaultIconsDialog(QDialog):
             iface.layerTreeView().model().setLayerTreeNodeFont(
                 QgsLayerTree.NodeGroup, iface.layerTreeView().font()
             )
-            self.settings.setValue("group_font", iface.layerTreeView().font())
+            self.settings.setValue(
+                "group_font", iface.layerTreeView().font().toString()
+            )
 
         f = QFont()
         if f.fromString(self.settings.value("layer_font")) and f.family():
@@ -153,7 +155,7 @@ class DefaultIconsDialog(QDialog):
             iface.layerTreeView().model().setLayerTreeNodeFont(
                 QgsLayerTree.NodeLayer, f
             )
-            self.settings.setValue("layer_font", f)
+            self.settings.setValue("layer_font", f.toString())
         self.update_font_labels()
 
     def set_icon_from_ressources(self, settings_key):

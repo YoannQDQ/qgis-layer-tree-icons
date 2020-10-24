@@ -125,6 +125,14 @@ class CustomTreeModel(QgsLayerTreeModel):
         node = self.index2node(index)
         legend_node = self.index2legendNode(index)
 
+        if legend_node and role == Qt.DecorationRole:
+            pixmap = pixmapForLegendNode(legend_node)
+            if pixmap:
+                return pixmap
+
+        if not node:
+            return super().data(index, role)
+
         if role == Qt.FontRole:
             f = iface.layerTreeView().font()
 
@@ -179,14 +187,6 @@ class CustomTreeModel(QgsLayerTreeModel):
             else:
                 if self.settings.value("layer_background_color"):
                     return QColor(self.settings.value("layer_background_color"))
-
-        if legend_node and role == Qt.DecorationRole:
-            pixmap = pixmapForLegendNode(legend_node)
-            if pixmap:
-                return pixmap
-
-        if not node:
-            return super().data(index, role)
 
         # Override data for DecorationRole (Icon)
         if role == Qt.DecorationRole and index.column() == 0:
