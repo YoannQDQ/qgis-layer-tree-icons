@@ -156,12 +156,14 @@ Here's a minimalist python plugin that adds opacity controls in the context menu
 from PyQt5.QtCore import QObject, QEvent
 from qgis.utils import iface
 
-def createContextMenu():
+def createContextMenu(event):
     menu = iface.layerTreeView().menuProvider()._original()
     for provider in iface.layerTreeView().menuProvider().providers:
-        provider(menu)
+        try:
+            provider(menu, event)
+        except TypeError:
+            provider(menu)
     return menu
-
 
 class LayerTreeContextMenuManager(QObject):
     """ Installed as an event filter on the QGIS layer tree
@@ -196,7 +198,7 @@ class LayerTreeContextMenuManager(QObject):
         """ Allow to call the patched createContextMenu (otherwise, the original c++
         version is called) """
         if event.type() == QEvent.ContextMenu:
-            menu = self.menuProvider.createContextMenu()
+            menu = self.menuProvider.createContextMenu(event)
             menu.exec(self.view.mapToGlobal(event.pos()))
             return True
         return False

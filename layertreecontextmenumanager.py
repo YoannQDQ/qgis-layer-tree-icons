@@ -54,10 +54,24 @@ from PyQt5.QtCore import QObject, QEvent
 from qgis.utils import iface
 
 
-def createContextMenu():
+def createContextMenu(event):
+    """Patched version of createContextMenu
+
+    Args:
+        event (QEvent): event which triggered the context menu (QEvent.ContextMenu)
+            forwarded to keep track of the modifiers
+
+    Returns:
+        QMenu: context menu
+    """
     menu = iface.layerTreeView().menuProvider()._original()
     for provider in iface.layerTreeView().menuProvider().providers:
-        provider(menu)
+
+        # Accept two providers signatures
+        try:
+            provider(menu, event)
+        except TypeError:
+            provider(menu)
     return menu
 
 
@@ -94,7 +108,7 @@ class LayerTreeContextMenuManager(QObject):
         """ Allow to call the patched createContextMenu (otherwise, the original c++
         version is called) """
         if event.type() == QEvent.ContextMenu:
-            menu = self.menuProvider.createContextMenu()
+            menu = self.menuProvider.createContextMenu(event)
             menu.exec(self.view.mapToGlobal(event.pos()))
             return True
         return False
