@@ -57,7 +57,7 @@ def pixmapForLegendNode(legend_node):
         return
 
     # Compute minimum width
-    model = iface.layerTreeView().model()
+    model = iface.layerTreeView().layerTreeModel()
     if not legend_node.layerNode():
         return
 
