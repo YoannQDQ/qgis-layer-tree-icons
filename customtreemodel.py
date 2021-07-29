@@ -9,6 +9,7 @@ from PyQt5.QtCore import (
 from PyQt5.QtGui import QIcon, QPixmap, QPainter, QFontMetricsF, QColor
 
 from qgis.core import (
+    Qgis,
     QgsProject,
     QgsLayerTreeModel,
     QgsLayerTree,
@@ -57,7 +58,11 @@ def pixmapForLegendNode(legend_node):
         return
 
     # Compute minimum width
-    model = iface.layerTreeView().layerTreeModel()
+    if Qgis.QGIS_VERSION_INT >= 31800:
+        layer_tree_model = iface.layerTreeView().layerTreeModel()
+    else:
+        layer_tree_model = iface.layerTreeView().model()
+
     if not legend_node.layerNode():
         return
 
@@ -66,7 +71,7 @@ def pixmapForLegendNode(legend_node):
     minimum_width = max(
         max(
             l_node.minimumIconSize().width() + (8 if text else 0)
-            for l_node in model.layerLegendNodes(legend_node.layerNode())
+            for l_node in layer_tree_model.layerLegendNodes(legend_node.layerNode())
             if isinstance(l_node, QgsSymbolLegendNode)
         ),
         size.width(),

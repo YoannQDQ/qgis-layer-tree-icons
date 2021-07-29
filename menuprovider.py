@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QAction, QDialog, QFileDialog
 from PyQt5.QtGui import QIcon, QColor
 
 from qgis.utils import iface
-from qgis.core import QgsLayerTree
+from qgis.core import QgsLayerTree, Qgis
 
 from .resourcebrowserimpl import ResourceBrowser
 from .colorfontdialog import ColorFontDialog
@@ -101,7 +101,12 @@ class LayerTreeMenuProvider(QObject):
         """ Set a custom icon as a custom property on the selected nodes """
         dialog = ColorFontDialog(iface.mainWindow())
 
-        f = iface.layerTreeView().layerTreeModel().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+        if Qgis.QGIS_VERSION_INT >= 31800:
+            layer_tree_model = iface.layerTreeView().layerTreeModel()
+        else:
+            layer_tree_model = iface.layerTreeView().model()
+
+        f = layer_tree_model.layerTreeNodeFont(QgsLayerTree.NodeLayer)
 
         for node in self.nodes:
             if node.customProperty("plugins/customTreeIcon/font"):
