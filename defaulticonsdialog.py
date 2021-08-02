@@ -133,11 +133,11 @@ class DefaultIconsDialog(QDialog):
 
         f = QFont()
         if f.fromString(self.settings.value("group_font")) and f.family():
-            iface.layerTreeView().model().setLayerTreeNodeFont(
+            iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(
                 QgsLayerTree.NodeGroup, f
             )
         else:
-            iface.layerTreeView().model().setLayerTreeNodeFont(
+            iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(
                 QgsLayerTree.NodeGroup, iface.layerTreeView().font()
             )
             self.settings.setValue(
@@ -146,13 +146,13 @@ class DefaultIconsDialog(QDialog):
 
         f = QFont()
         if f.fromString(self.settings.value("layer_font")) and f.family():
-            iface.layerTreeView().model().setLayerTreeNodeFont(
+            iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(
                 QgsLayerTree.NodeLayer, f
             )
         else:
             f = iface.layerTreeView().font()
             f.setBold(True)
-            iface.layerTreeView().model().setLayerTreeNodeFont(
+            iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(
                 QgsLayerTree.NodeLayer, f
             )
             self.settings.setValue("layer_font", f.toString())
@@ -166,7 +166,7 @@ class DefaultIconsDialog(QDialog):
             self.settings.setValue(
                 f"defaulticons/{settings_key}", self.resource_browser.icon
             )
-        iface.layerTreeView().model().dataChanged.emit(QModelIndex(), QModelIndex())
+        iface.layerTreeView().layerTreeModel().dataChanged.emit(QModelIndex(), QModelIndex())
 
     def set_icon_from_file(self, settings_key):
 
@@ -182,13 +182,13 @@ class DefaultIconsDialog(QDialog):
         button = self.findChild(QToolButton, settings_key)
         button.setIcon(QIcon(icon))
         self.settings.setValue(f"defaulticons/{settings_key}", icon)
-        iface.layerTreeView().model().dataChanged.emit(QModelIndex(), QModelIndex())
+        iface.layerTreeView().layerTreeModel().dataChanged.emit(QModelIndex(), QModelIndex())
 
     def reset(self, settings_key):
         button = self.findChild(QToolButton, settings_key)
         button.setIcon(QIcon(self.source_data[settings_key][1]))
         self.settings.setValue(f"defaulticons/{settings_key}", "")
-        iface.layerTreeView().model().dataChanged.emit(QModelIndex(), QModelIndex())
+        iface.layerTreeView().layerTreeModel().dataChanged.emit(QModelIndex(), QModelIndex())
 
     def reset_all(self):
         for settings_key, (_, default_icon) in self.source_data.items():
@@ -203,13 +203,13 @@ class DefaultIconsDialog(QDialog):
         f.setBold(True)
         self.settings.setValue(f"layer_font", f.toString())
         f = iface.layerTreeView().font()
-        iface.layerTreeView().model().setLayerTreeNodeFont(QgsLayerTree.NodeGroup, f)
+        iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(QgsLayerTree.NodeGroup, f)
         f.setBold(True)
-        iface.layerTreeView().model().setLayerTreeNodeFont(QgsLayerTree.NodeLayer, f)
+        iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(QgsLayerTree.NodeLayer, f)
         self.settings.setValue(f"layer_text_color", "")
         self.settings.setValue(f"layer_background_color", "")
         self.update_font_labels()
-        iface.layerTreeView().model().dataChanged.emit(QModelIndex(), QModelIndex())
+        iface.layerTreeView().layerTreeModel().dataChanged.emit(QModelIndex(), QModelIndex())
         self.icon_size_combo.setCurrentIndex(0)
 
     def on_icon_size_changed(self):
@@ -235,7 +235,7 @@ class DefaultIconsDialog(QDialog):
         if res != QDialog.Accepted:
             return
 
-        iface.layerTreeView().model().setLayerTreeNodeFont(
+        iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(
             QgsLayerTree.NodeGroup, dialog.currentFont()
         )
         self.settings.setValue(f"group_font", dialog.currentFont().toString())
@@ -253,7 +253,7 @@ class DefaultIconsDialog(QDialog):
         f.fromString(self.settings.value("layer_font"))
         dialog.setCurrentFont(f)
 
-        f = iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+        f = iface.layerTreeView().layerTreeModel().layerTreeNodeFont(QgsLayerTree.NodeLayer)
         dialog.setCurrentFont(f)
         if self.settings.value("layer_text_color"):
             dialog.setTextColor(QColor(self.settings.value("layer_text_color")))
@@ -266,7 +266,7 @@ class DefaultIconsDialog(QDialog):
         if res != QDialog.Accepted:
             return
 
-        iface.layerTreeView().model().setLayerTreeNodeFont(
+        iface.layerTreeView().layerTreeModel().setLayerTreeNodeFont(
             QgsLayerTree.NodeLayer, dialog.currentFont()
         )
         self.settings.setValue(f"layer_font", dialog.currentFont().toString())
@@ -279,7 +279,7 @@ class DefaultIconsDialog(QDialog):
 
     def update_font_labels(self):
         layer_font = (
-            iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+            iface.layerTreeView().layerTreeModel().layerTreeNodeFont(QgsLayerTree.NodeLayer)
         )
         self.layer_font_label.setText(
             f"{layer_font.family()}, {layer_font.pointSize()}"
@@ -296,7 +296,7 @@ class DefaultIconsDialog(QDialog):
         )
 
         group_font = (
-            iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeGroup)
+            iface.layerTreeView().layerTreeModel().layerTreeNodeFont(QgsLayerTree.NodeGroup)
         )
         self.group_font_label.setText(
             f"{group_font.family()}, {group_font.pointSize()}"

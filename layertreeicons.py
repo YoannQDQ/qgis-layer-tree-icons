@@ -71,7 +71,7 @@ class LayerTreeIcons:
             QCoreApplication.installTranslator(self.translator)
 
         # Save original layer tree model
-        self.original_layer_tree_model = self.iface.layerTreeView().model()
+        self.original_layer_tree_model = self.iface.layerTreeView().layerTreeModel()
         self.original_layer_tree_model.blockSignals(True)
 
         # Init settings

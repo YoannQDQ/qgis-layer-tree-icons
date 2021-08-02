@@ -101,7 +101,7 @@ class LayerTreeMenuProvider(QObject):
         """ Set a custom icon as a custom property on the selected nodes """
         dialog = ColorFontDialog(iface.mainWindow())
 
-        f = iface.layerTreeView().model().layerTreeNodeFont(QgsLayerTree.NodeLayer)
+        f = iface.layerTreeView().layerTreeModel().layerTreeNodeFont(QgsLayerTree.NodeLayer)
 
         for node in self.nodes:
             if node.customProperty("plugins/customTreeIcon/font"):

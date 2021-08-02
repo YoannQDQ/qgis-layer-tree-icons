@@ -28,7 +28,7 @@ from qgis.utils import iface, QgsMessageLog
 
 def createTemporaryRenderContext():
 
-    layerModel = iface.layerTreeView().model()
+    layerModel = iface.layerTreeView().layerTreeModel()
     mupp, dpi, scale = layerModel.legendMapViewData()
 
     if qgsDoubleNear(mupp, 0.0) or dpi == 0 or qgsDoubleNear(scale, 0.0):
@@ -57,7 +57,7 @@ def pixmapForLegendNode(legend_node):
         return
 
     # Compute minimum width
-    model = iface.layerTreeView().model()
+    model = iface.layerTreeView().layerTreeModel()
     if not legend_node.layerNode():
         return
 
