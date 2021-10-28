@@ -13,6 +13,7 @@ from qgis.core import (
     QgsLayerTreeModel,
     QgsLayerTree,
     QgsVectorLayer,
+    QgsMeshLayer,
     QgsApplication,
     QgsWkbTypes,
     QgsMapLayer,
@@ -275,7 +276,11 @@ class CustomTreeModel(QgsLayerTreeModel):
             # the custom icon. Adapted from QGIS source code (qgslayertreemodel.cpp)
             if (pixmap or icon) and QgsLayerTree.isLayer(node):
                 layer = node.layer()
-                if layer and isinstance(layer, QgsVectorLayer) and layer.isEditable():
+                if (
+                    layer
+                    and (isinstance(layer, QgsVectorLayer) or isinstance(layer, QgsMeshLayer))
+                    and layer.isEditable()
+                ):
                     icon_size = iface.layerTreeView().iconSize().width()
                     if icon_size == -1:
                         icon_size = 16
